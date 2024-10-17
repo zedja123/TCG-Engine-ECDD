@@ -21,6 +21,7 @@ namespace TcgEngine.Server
         public static float game_expire_time = 30f;      //How long for the game to be deleted when no one is connected
         public static float win_expire_time = 60f;       //How long for a player to be declared winnner if hes the only one connected
 
+        public Game game;
         private Game game_data;
         private GameLogic gameplay;
         private float expiration = 0f;
@@ -180,6 +181,27 @@ namespace TcgEngine.Server
             foreach (AIPlayer ai in ai_list)
             {
                 ai.Update();
+            }
+            if (game_data.phase == GamePhase.Main && game.response_phase == ResponsePhase.None)
+            {
+                game_data.turn_timer -= Time.deltaTime;
+
+            }
+            else if (game_data.response_phase != ResponsePhase.None)
+            {
+                game_data.response_timer -= Time.deltaTime;
+            }
+
+            if (game_data.turn_timer <= 0f)
+            {
+                //Time expired during turn
+                gameplay.NextStep();
+            }
+
+            if (game_data.response_timer <= 0f)
+            {
+                // Time expired to response action
+                gameplay.CancelSelection();
             }
         }
 
